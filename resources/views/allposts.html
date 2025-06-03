@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>All Posts</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+  <div class="container py-5">
+    <!-- Heading and Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">All Posts</h2>
+      <div>
+        <a class="btn btn-success me-2" href="/addpost">Add New</a>
+        <button class="btn btn-danger" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive overflow-auto" style="max-height: 70vh;">
+      <table class="table table-bordered table-hover align-middle ">
+        <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+          <tr>
+            <th scope="col">Image</th>
+            <th scope="col">Title</th>
+            <th scope="col">Description</th>
+            <th scope="col">View</th>
+            <th scope="col">Update</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal for view -->
+  <div class="modal fade" id="singlePostModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="singlePostLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="singlePostLabel">Post details</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for update -->
+  <div class="modal fade" id="updatePostModal" tabindex="-1" aria-labelledby="updatePostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="updatePostModalLabel">Update Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="updatePostForm">
+            <div class="mb-3">
+              <label for="postTitle" class="form-label">Title</label>
+              <input type="text" class="form-control" id="postTitle" name="title" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="postDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="postDescription" name="description" rows="2" required></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Current post Image</label><br>
+              <img id="oldPostImage" alt="Current Post Image" class="img-fluid rounded" style="max-height: 90px;">
+            </div>
+
+            <div class="mb-3">
+              <label for="postImage" class="form-label">Image</label>
+              <input type="file" class="form-control" id="postImage" name="image" accept="image/*">
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="updatePostForm" class="btn btn-success" id="saveUpdates">Save Changes</button>
+        </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for delete -->
+  <div class="modal fade" id="deletePostModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="deletePostLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <h1 class="modal-title fs-5" id="deletePostLabel">
+            <p>Do you want to delete this post?</p>
+          </h1>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <button type="button" class="btn btn-danger" id="deleteModalYesBtn">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js"
+    integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D"
+    crossorigin="anonymous"></script>
+  <script>
+    document.querySelector('#logoutBtn').addEventListener("click", () => {
+      const token = localStorage.getItem("api_token");
+
+      fetch("/api/logout", {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          localStorage.clear();
+          window.location.href = 'http://localhost:8000/';
+        });
+    });
+
+    function loadData() {
+      const token = localStorage.getItem("api_token");
+      fetch("/api/posts", {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          postArray = data.data.posts;
+          const tableBody = document.getElementById("table-body");
+          for (let i = 0; i < postArray.length; i++) {
+            const post = document.createElement('tr');
+            post.innerHTML = `<td><img src="/uploads/${postArray[i].image}" width="100px" height="100px"/></td>
+            <td>${postArray[i].title}</td>
+            <td>${postArray[i].description}</td>
+            <td><button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#singlePostModal" data-bs-postid="${postArray[i].id}">View</button></td>
+            <td><button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#updatePostModal" data-bs-postid="${postArray[i].id}">Update</button></td>
+            <td><button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal" data-bs-postid="${postArray[i].id}">Delete</button></td>`;
+            tableBody.appendChild(post);
+
+
+          }
+
+        });
+    }
+    loadData();
+    //Code for opening single post modal
+
+    var singleModal = document.querySelector("#singlePostModal")
+
+    if (singleModal) {
+      singleModal.addEventListener('show.bs.modal', event => {
+        // Button that triggered the modal
+        const button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        const id = button.getAttribute('data-bs-postid');
+        const token = localStorage.getItem("api_token");
+        fetch(`/api/posts/${id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/layer'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            const post = data.data.post[0];
+            const modalBody = document.querySelector("#singlePostModal .modal-body")
+            modalBody.innerHTML = `<div class="modal-body">
+            <div class="text-center mb-3">
+            <!-- Post Image -->
+            <img src="/uploads/${post.image}" alt="Post Image" class="img-fluid rounded" style="max-height: 300px;">
+            </div>
+
+            <!-- Post Title -->
+            <h5 class="text-primary">${post.title}</h5>
+
+            <!-- Post Description -->
+            <p class="text-muted">
+            ${post.description}
+            </p>
+            </div>`
+          })
+      })
+    }
+
+    function deletePost(id, token) {
+      fetch(`/api/posts/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          console.log(data)
+
+        })
+
+    }
+
+    var deleteModal = document.querySelector("#deletePostModal")
+
+    if (deleteModal) {
+      deleteModal.addEventListener('show.bs.modal', event => {
+        // Button that triggered the modal
+        const button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        const id = button.getAttribute('data-bs-postid')
+        const token = localStorage.getItem("api_token");
+        yesBtn = document.getElementById("deleteModalYesBtn");
+        yesBtn.addEventListener("click", () => {
+          deletePost(id, token);
+          window.location.replace("http://localhost:8000/allposts");
+        })
+
+      })
+    }
+
+    var updateModal = document.querySelector("#updatePostModal")
+
+    if (updateModal) {
+      updateModal.addEventListener('show.bs.modal', event => {
+        // Button that triggered the modal
+        const button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        const id = button.getAttribute('data-bs-postid')
+        const token = localStorage.getItem("api_token");
+
+        fetch(`/api/posts/${id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/layer'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            const post = data.data.post[0];
+            document.getElementById("postTitle").value = post.title;
+            document.getElementById("postDescription").value = post.description;
+            document.getElementById("oldPostImage").setAttribute("src", `/uploads/${post.image}`);
+            const form = document.getElementById("updatePostForm");
+            form.addEventListener("submit", (e) => {
+              e.preventDefault();
+              const formData = new FormData();
+
+              const title = document.getElementById("postTitle").value;
+              const description = document.getElementById("postDescription").value;
+              var image = document.getElementById("postImage").files[0];
+              if (image != undefined) {
+                formData.append("image", image);
+
+              }
+              formData.append("title", title);
+              formData.append("description", description);
+
+              fetch(`/api/posts/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'X-HTTP-Method-Override': 'PUT',
+                }
+              }).then(response => response.json())
+                .then(data => console.log(data))
+              window.location.replace("http://localhost:8000/allposts");
+            })
+          })
+      })
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add New Post</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom CSS Animation -->
+  <style>
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animated-card {
+      animation: fadeSlideIn 0.6s ease-in-out;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      min-height: 100vh;
+    }
+
+    .card {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container py-5 d-flex justify-content-center align-items-center" id="container">
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 animated-card bg-white">
+        <h3 class="text-center mb-4 text-primary">Add New Post</h3>
+
+        <form id="form">
+          <!-- Title -->
+          <div class="mb-3">
+            <label for="title" class="form-label">Post Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Enter post title" required>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="description" class="form-label">Post Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4"
+              placeholder="Write a brief description..." required></textarea>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="mb-4">
+            <label for="image" class="form-label">Upload Image</label>
+            <input class="form-control" type="file" id="image" name="image" accept="image/*" required>
+          </div>
+
+          <!-- Buttons -->
+          <div class="d-flex justify-content-between">
+            <a href="/allposts" class="btn btn-outline-secondary">← Go Back</a>
+            <button type="button" class="btn btn-primary px-4" id="submitBtn">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+
+        <strong class="me-auto">Post Manager</strong>
+        <small>alert</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="toast-body">
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js"
+    integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D"
+    crossorigin="anonymous"></script>
+</body>
+
+<script>
+
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    const form = document.getElementById('form')
+    const formData = new FormData(form);
+    const toastMsg = bootstrap.Toast.getOrCreateInstance(document.getElementById("liveToast"));
+    const toastBody = document.getElementById("toast-body");
+    const token = localStorage.getItem("api_token");
+    fetch('api/posts', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status == true) {
+          document.getElementById("title").value = "";
+          document.getElementById("description").value = "";
+          document.getElementById("image").value = "";
+          toastBody.innerHTML = `Your post is added successfully. <a href="/allposts">Click here to view</a>`;
+        }
+        else {
+          toastBody.innerHTML = `please fill the details correctly to add a new post`;
+        }
+        toastMsg.show();
+      })
+  })
+</script>
+
+</html>
